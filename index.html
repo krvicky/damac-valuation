@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DAMAC CFO Finance Co-Pilot</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">DAMAC Properties</p>
+          <h1>CFO Finance Co-Pilot</h1>
+        </div>
+        <div class="status-cluster">
+          <button id="apiKeyBtn" class="status-pill api-key-btn" title="Set OpenAI API Key">API Key</button>
+          <span id="apiStatus" class="status-pill">Checking voice API</span>
+          <span class="status-pill muted">Scripted-live data</span>
+        </div>
+      </header>
+
+      <main class="workspace">
+        <section class="decision-strip" aria-label="Executive investment metrics">
+          <article>
+            <span>IRR</span>
+            <strong id="metricIrr">--</strong>
+            <div id="metricIrrNew" class="computed-kpi"></div>
+            <small id="metricSpread">Against 12.0% hurdle</small>
+          </article>
+          <article>
+            <span>NPV</span>
+            <strong id="metricNpv">--</strong>
+            <div id="metricNpvNew" class="computed-kpi"></div>
+            <small>AEDm at 10.5% discount</small>
+          </article>
+          <article>
+            <span>Total CAPEX</span>
+            <strong id="metricCapex">--</strong>
+            <div id="metricCapexNew" class="computed-kpi"></div>
+            <small>Phased 2026 to 2032</small>
+          </article>
+          <article>
+            <span>Risk Score</span>
+            <strong id="metricRisk">--</strong>
+            <div id="metricRiskNew" class="computed-kpi"></div>
+            <small id="metricRiskText">Executive sensitivity</small>
+          </article>
+        </section>
+
+        <nav class="tabs" aria-label="Dashboard tabs">
+          <button class="tab active" data-tab="overview">Investment Overview</button>
+          <button class="tab" data-tab="scenarios">IRR / CAPEX Scenarios</button>
+          <button class="tab" data-tab="risk">Risk Sensitivities</button>
+          <button class="tab" data-tab="cashflow">Cash Flow Drilldown</button>
+          <button class="tab" data-tab="controls">Controls Risk</button>
+        </nav>
+
+        <section class="tab-panel active" id="overview">
+          <div class="panel-grid overview-grid">
+            <div class="module wide">
+              <div class="module-header">
+                <div>
+                  <span class="kicker">FIN-01 + FIN-05 + FIN-06</span>
+                  <h2 id="scenarioTitle">Data Center investment case</h2>
+                </div>
+                <select id="scenarioSelect" aria-label="Scenario">
+                  <option value="base">Base Case</option>
+                  <option value="upside">Upside Case</option>
+                  <option value="downside">Downside Case</option>
+                </select>
+              </div>
+              <p id="scenarioNarrative" class="narrative"></p>
+              <div id="cashFlowChart" class="chart" aria-label="Free cash flow chart"></div>
+            </div>
+            <div class="module">
+              <div class="module-header compact">
+                <h2>Executive Action</h2>
+              </div>
+              <p id="recommendation" class="callout"></p>
+              <div class="assumption-list" id="assumptionList"></div>
+            </div>
+            <div class="module">
+              <div class="module-header compact">
+                <h2>Data confidence</h2>
+                <button id="validateModelButton" class="icon-text-button" title="Validate model">Validate</button>
+              </div>
+              <label class="upload-box">
+                <span>Upload model CSV/TSV</span>
+                <input id="modelUpload" type="file" accept=".csv,.tsv,.txt" />
+              </label>
+              <div id="dataConfidence" class="mini-table"></div>
+            </div>
+            <div class="module">
+              <h2>Committee summary</h2>
+              <div id="committeePanel" class="summary-list"></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="tab-panel" id="scenarios">
+          <div class="panel-grid">
+            <div class="module wide">
+              <div class="module-header">
+                <h2>Scenario comparison</h2>
+                <button id="compareButton" class="icon-text-button" title="Compare valuation cases">Compare</button>
+              </div>
+              <div id="scenarioBars" class="comparison"></div>
+            </div>
+            <div class="module">
+              <h2>Capital allocation lens</h2>
+              <p class="callout">Use the voice agent to ask for CAPEX increases, downside occupancy, or board-ready investment recommendations.</p>
+              <div class="mini-table" id="capexTable"></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="tab-panel" id="risk">
+          <div class="panel-grid">
+            <div class="module wide">
+              <div class="module-header">
+                <h2>Sensitivity analysis</h2>
+                <button id="sensitivityButton" class="icon-text-button" title="Run sensitivity analysis">Run</button>
+              </div>
+              <div id="sensitivityChart" class="sensitivity"></div>
+            </div>
+            <div class="module">
+              <h2>Risk drivers</h2>
+              <div id="riskDrivers" class="driver-list"></div>
+            </div>
+            <div class="module">
+              <h2>Value drivers</h2>
+              <div id="valueDrivers" class="driver-list"></div>
+            </div>
+            <div class="module">
+              <h2>Metric bridge</h2>
+              <div id="bridgePanel" class="mini-table"></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="tab-panel" id="cashflow">
+          <div class="module">
+            <div class="module-header">
+              <h2>Annual cash flow bridge</h2>
+              <button id="cashFlowButton" class="icon-text-button" title="Refresh cash flow">Refresh</button>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Year</th>
+                    <th>Occupancy</th>
+                    <th>Revenue</th>
+                    <th>Opex</th>
+                    <th>EBITDA</th>
+                    <th>CAPEX</th>
+                    <th>FCF</th>
+                    <th>Terminal</th>
+                  </tr>
+                </thead>
+                <tbody id="cashFlowTable"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <section class="tab-panel" id="controls">
+          <div class="panel-grid">
+            <div class="module wide">
+              <h2>Financial control and compliance risk</h2>
+              <div class="controls-grid">
+                <article>
+                  <span>FIN-24</span>
+                  <strong>Trial Balance Scrutiny</strong>
+                  <p>AI reasoning flags high-risk and high-opportunity accounts before close.</p>
+                </article>
+                <article>
+                  <span>FIN-27</span>
+                  <strong>Governance AI</strong>
+                  <p>Continuous control testing and audit coordination for always-ready finance.</p>
+                </article>
+                <article>
+                  <span>FIN-28</span>
+                  <strong>IFRS Checklist</strong>
+                  <p>Automated compliance checklist monitoring with executive exception views.</p>
+                </article>
+              </div>
+            </div>
+            <div class="module">
+              <h2>Alternate demo angle</h2>
+              <p class="callout">Position this as a secondary risk lens after the valuation conversation lands.</p>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <aside class="voice-console" aria-label="Voice and chat console">
+        <div class="voice-main">
+          <button id="micButton" class="mic-button" aria-label="Start voice">
+            <svg class="mic-icon" aria-hidden="true" viewBox="0 0 24 24">
+              <path d="M12 14a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v5a3 3 0 0 0 3 3Z"></path>
+              <path d="M19 11a7 7 0 0 1-14 0"></path>
+              <path d="M12 18v4"></path>
+              <path d="M8 22h8"></path>
+            </svg>
+          </button>
+          <button id="muteButton" class="mute-button" aria-label="Mute microphone" disabled>
+            <svg class="mic-icon" aria-hidden="true" viewBox="0 0 24 24">
+              <path d="M12 14a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v5a3 3 0 0 0 3 3Z"></path>
+              <path d="M19 11a7 7 0 0 1-14 0"></path>
+              <path d="M12 18v4"></path>
+              <path d="M8 22h8"></path>
+              <path d="M4 4l16 16"></path>
+            </svg>
+          </button>
+          <div class="transcript">
+            <span id="voiceState">Voice idle</span>
+            <strong id="latestTranscript">Ask about IRR, CAPEX, downside occupancy, or top risks.</strong>
+          </div>
+        </div>
+        <form id="chatForm" class="chat-form">
+          <input id="chatInput" type="text" autocomplete="off" placeholder="Type a fallback question for the CFO co-pilot" />
+          <button type="submit">Send</button>
+        </form>
+        <div class="quick-prompts" aria-label="Demo prompts">
+          <button data-prompt="Evaluate the Data Center investment under a downside occupancy case.">Downside case</button>
+          <button data-prompt="What happens if CAPEX increases by 10 percent?">CAPEX +10%</button>
+          <button data-prompt="What are the top risks?">Top risks</button>
+          <button data-prompt="Rank the value drivers.">Value drivers</button>
+          <button data-prompt="Explain the IRR bridge from base to downside.">IRR bridge</button>
+          <button data-prompt="Generate an investment committee summary.">IC summary</button>
+        </div>
+        <div id="followUps" class="quick-prompts follow-ups" aria-label="Suggested follow-up prompts">
+        </div>
+      </aside>
+    </div>
+    <div id="apiKeyModal" class="api-key-modal" hidden>
+      <div class="api-key-modal__box">
+        <label for="apiKeyInput">OpenAI API Key <span class="api-key-session-note">(cleared on tab close)</span></label>
+        <input id="apiKeyInput" type="password" placeholder="sk-..." autocomplete="off" spellcheck="false" />
+        <div class="api-key-modal__actions">
+          <button id="apiKeySave" class="api-key-save-btn">Apply</button>
+          <button id="apiKeyCancel" class="api-key-cancel-btn">Cancel</button>
+        </div>
+      </div>
+    </div>
+    <script type="module" src="app.js"></script>
+  </body>
+</html>
