@@ -223,15 +223,15 @@
           <input id="chatInput" type="text" autocomplete="off" placeholder="Type a fallback question for the CFO co-pilot" />
           <button type="submit">Send</button>
         </form>
-        <div class="quick-prompts" aria-label="Demo prompts">
-          <button data-prompt="Evaluate the Data Center investment under a downside occupancy case.">Downside case</button>
-          <button data-prompt="What happens if CAPEX increases by 10 percent?">CAPEX +10%</button>
-          <button data-prompt="What are the top risks?">Top risks</button>
-          <button data-prompt="Rank the value drivers.">Value drivers</button>
-          <button data-prompt="Explain the IRR bridge from base to downside.">IRR bridge</button>
-          <button data-prompt="Generate an investment committee summary.">IC summary</button>
-        </div>
-        <div id="followUps" class="quick-prompts follow-ups" aria-label="Suggested follow-up prompts">
+        <div class="voice-drawer">
+          <div class="quick-prompts" aria-label="Demo prompts">
+            <button data-prompt="Does this investment beat the 12% hurdle rate?">Does this beat the hurdle?</button>
+            <button data-prompt="Show me the annual cash flows for this case.">Show annual cash flows</button>
+            <button data-prompt="What's the sensitivity to power costs?">Sensitivity to power cost</button>
+            <button data-prompt="Stress test this investment case.">Stress test this case</button>
+          </div>
+          <div id="followUps" class="quick-prompts follow-ups" aria-label="Suggested follow-up prompts">
+          </div>
         </div>
       </aside>
     </div>

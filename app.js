@@ -448,6 +448,9 @@ function render() {
 
 function inferToolFromPrompt(prompt) {
   const text = prompt.toLowerCase();
+  if (text.includes("hurdle") || text.includes("beat the")) {
+    return ["calculate_irr_scenario", withActiveModel({ scenario: state.scenario })];
+  }
   if (text.includes("top risk") || text.includes("risk driver")) {
     return ["explain_risk_drivers", withActiveModel({ scenario: state.scenario })];
   }
