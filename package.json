@@ -1,0 +1,14 @@
+{
+  "name": "damac-cfo-finance-copilot",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "demo": "powershell -ExecutionPolicy Bypass -File scripts/start-demo.ps1",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}
