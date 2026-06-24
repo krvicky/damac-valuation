@@ -21,6 +21,10 @@ import {
   realtimeFinanceTools,
   sessionInstructions
 } from "./public/finance.js";
+import {
+  realtimeFinanceToolsV2,
+  sessionInstructionsV2
+} from "./public/v02/finance.v02.js";
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 const publicDir = join(__dirname, "public");
@@ -86,6 +90,66 @@ async function createRealtimeToken(req, res) {
         }
       },
       tools: realtimeFinanceTools,
+      tool_choice: "auto"
+    }
+  };
+
+  try {
+    const response = await fetch("https://api.openai.com/v1/realtime/client_secrets", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+        "OpenAI-Safety-Identifier": safetyIdentifier(req)
+      },
+      body: JSON.stringify(sessionConfig)
+    });
+
+    const body = await response.text();
+    if (!response.ok) {
+      let parsed;
+      try {
+        parsed = JSON.parse(body);
+      } catch {
+        parsed = { error: body };
+      }
+      sendJson(res, response.status, {
+        error: parsed.error?.message || parsed.error || "OpenAI Realtime session creation failed.",
+        detail: parsed.error || parsed
+      });
+      return;
+    }
+
+    res.writeHead(response.status, { "Content-Type": response.headers.get("content-type") || "application/json" });
+    res.end(body);
+  } catch (error) {
+    sendJson(res, 500, { error: "Failed to create Realtime client secret.", detail: error.message });
+  }
+}
+
+async function createRealtimeTokenV2(req, res) {
+  const apiKey = process.env.OPENAI_API_KEY || req.headers["x-openai-key"];
+  if (!apiKey) {
+    sendJson(res, 503, {
+      error: "OPENAI_API_KEY is not configured on the server.",
+      hint: "Click 'API Key' in the top right to enter your OpenAI key for this session."
+    });
+    return;
+  }
+
+  const sessionConfig = {
+    session: {
+      type: "realtime",
+      model: realtimeModel,
+      instructions: sessionInstructionsV2,
+      audio: {
+        output: { voice: realtimeVoice },
+        input: {
+          transcription: { model: "gpt-realtime-whisper" },
+          turn_detection: { type: "server_vad", threshold: 0.5, prefix_padding_ms: 300, silence_duration_ms: 650 }
+        }
+      },
+      tools: realtimeFinanceToolsV2,
       tool_choice: "auto"
     }
   };
@@ -196,6 +260,11 @@ const server = createServer(async (req, res) => {
         realtimeModel,
         realtimeVoice
       });
+      return;
+    }
+
+    if (req.method === "GET" && req.url.startsWith("/api/v02/realtime-token")) {
+      await createRealtimeTokenV2(req, res);
       return;
     }
 
